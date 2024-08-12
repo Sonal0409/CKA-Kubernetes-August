@@ -119,7 +119,40 @@ save the file
 
 # kubectl create -f multi-pod.yml
 
+==============================================
+Demo 3: replicaSet
 
+# vim replicaset.yml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+ name: myrs
+spec:
+ replicas: 5
+ selector: # it is a query which k8s will run to see how many pods are already there with matching label
+  matchLabels:
+   app: webserver
+ template: # this is pod template, using this Replicaset will create pods
+  metadata:
+   labels:
+    app: webserver
+  spec:
+   containers:
+    - name: c1
+      image: nginx
+
+
+
+# kubectl create -f replicaset.yml
+
+# kubectl get all
+
+# kubectl scale replicaset myrs --replicas=6
+
+scale down:
+
+# # kubectl scale replicaset myrs --replicas=3
 
 
 
