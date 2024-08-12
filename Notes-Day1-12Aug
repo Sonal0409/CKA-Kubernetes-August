@@ -90,6 +90,7 @@ Save the file
 
 # kubectl describe pod pod1
 
+# kubectl delete pod pod1
 
 
 
