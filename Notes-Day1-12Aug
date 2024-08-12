@@ -86,6 +86,9 @@ Save the file
 
 # kubectl create -f pod-defintion.yml
 
+# kubectl get pods
+
+# kubectl describe pod pod1
 
 
 
