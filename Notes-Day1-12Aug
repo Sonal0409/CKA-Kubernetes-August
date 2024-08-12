@@ -60,6 +60,41 @@ Validate on MASTER node
 # kubectl get nodes
 # kubectl get nodes -o wide
 
+========================================
+Demo 1:
+========================================
+
+# mkdir mykubefiles
+# cd mykubefiles
+# vim pod-defintion.yml
+
+apiVersion: v1 # schema that k8s uses to create the pod object
+kind: Pod   # object to be created by kubernetes
+metadata:
+ name: pod1  # give any name to pod
+ labels:     # labels are sued to query similar pods on the cluster, labels are key and values given by user
+  author: sonal
+  app: webapp
+  env: test
+spec:   # speciify what is it that you want on the pod
+ containers:
+  - name: c1
+    image: nginx
+
+
+Save the file
+
+# kubectl create -f pod-defintion.yml
+
+
+
+
+
+
+
+
+
+
 
 
 
