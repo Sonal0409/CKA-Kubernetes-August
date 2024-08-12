@@ -92,7 +92,32 @@ Save the file
 
 # kubectl delete pod pod1
 
+===========================================
+Demo 2: Multi container pod
 
+# vim multi-pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+ name: multi-pod
+ labels:
+  type: webserver
+  author: sonal
+spec:
+ containers:
+  - name: c1
+    image: nginx
+  - name: c2
+    image: tomcat
+  - name: c3
+    image: ubuntu
+    command: [/bin/bash, -c, 'sleep 6000']
+
+
+save the file
+
+# kubectl create -f multi-pod.yml
 
 
 
