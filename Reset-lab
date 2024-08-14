@@ -1,0 +1,65 @@
+Troubleshoot the cluster incase of issues
+========================================================================
+
+If worker nodes are in Noteready status, you can reset them by executing below steps:
+
+ON MASTER NODE:
+===========================
+# kubectl delete node <nodename>
+
+# kubectl get nodes
+
+ON WORKER NODE TO BE RESET
+================================
+On the same Worker node that we have to reset execute below command:
+
+# kubeadm reset --force
+# sudo rm -rf /etc/kubernetes/
+
+generate the token again on the Master node, execute below command:
+===================================================
+# sudo kubeadm token create --print-join-command
+
+Copy the token
+
+On Worker Node:
+Paste the token, the node will join the master node
+
+On Master Node:
+# kubectl get nodes
+
+=========================================================================
+
+If master node is in NOT Ready status: Execute below steps to reset Master node
+
+On Master Node:
+===============================================
+
+# kubectl delete -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
+
+# kubeadm reset --force
+
+# rm -rf /var/lib/kubelet /etc/kubernetes /var/lib/etcd $HOME/.kube
+
+# sudo kubeadm init
+
+sudo mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+## install networking driver -- Weave/flannel/canal/calico etc... 
+
+# kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/calico.yaml
+
+generate the token again on the Master node, execute below command:
+===============================================
+# sudo kubeadm token create --print-join-command
+
+Copy the token
+
+On Worker Node:
+Paste the token, the node will join the master node
+
+On Master Node:
+# kubectl get nodes
+
