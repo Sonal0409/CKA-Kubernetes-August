@@ -1,0 +1,47 @@
+
+Service Object
+
+1. ClsuterIP
+
+
+Create a POD of nginx
+
+# vim newpod.yml
+
+apiVersion: v1 # schema that k8s uses to create the pod object
+kind: Pod   # object to be created by kubernetes
+metadata:
+ name: pod1  # give any name to pod
+ labels:     # labels are sued to query similar pods on the cluster, labels are key and values given by user
+  author: sonal
+  app: webapp
+  env: test
+spec:   # speciify what is it that you want on the pod
+ containers:
+  - name: c1
+    image: nginx
+
+
+# kubectl create -f newpod.yml
+
+
+# vim service.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysvc
+spec:
+  type: NodePort
+  selector: # select those pods with the matching label
+   app: webapp
+  ports:
+  - port: 80   # service object port
+    targetPort: 80  # container port
+
+
+# kubectl create -f service.yml
+
+# kubectl get service mysvc
+
+# kubectl get endpoints
