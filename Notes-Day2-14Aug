@@ -123,5 +123,19 @@ spec:
 
 # kubectl get endpoints
 
+To check from browser:
+
+GO to lab dashboard ---> Master --> click on Desktop
+
+Click on activites --> search for firefox
+
+Once browser opens give:
+
+localhost:portnumber
+
+
+
+
+
 
 
