@@ -68,10 +68,30 @@ Service - NodePort:
 
 # kubectl delete pods --all
 
+# vim replicaset-1.yml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+ name: myrs
+spec:
+ replicas: 3
+ selector: 
+  matchLabels:
+   app: webserver
+ template: 
+  metadata:
+   labels:
+    app: webserver
+  spec:
+   containers:
+    - name: c1
+      image: nginx
 
 
+# kubectl create -f replicaset-1.yml
 
-
+we will have 3 endpoints
 
 
 
