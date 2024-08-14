@@ -98,4 +98,30 @@ we will have 3 endpoints
 # kubectl get pods -o wide
 
 
+Create a Nodeport service:
+
+# vim service-1.yml
+
+
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysvc1
+spec:
+ type: NodePort
+ ports:
+  - port: 80
+    targetPort: 80
+ selector:
+  app: webserver
+
+
+
+# kubectl create -f service-1.yml
+
+# kubectl get service mysvc1
+
+# kubectl get endpoints
+
+
 
