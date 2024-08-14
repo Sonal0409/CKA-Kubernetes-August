@@ -49,7 +49,7 @@ spec:
 
 Create a test pod to check if request can be sent to nginx
 
-# kubectl run pod2 ubuntu --command sleep 6000
+# kubectl run pod2 --image ubuntu --command sleep 6000
 
 # kubectl get pods
 
