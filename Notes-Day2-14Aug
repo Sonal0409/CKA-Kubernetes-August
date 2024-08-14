@@ -45,3 +45,25 @@ spec:
 # kubectl get service mysvc
 
 # kubectl get endpoints
+
+
+Create a test pod to check if request can be sent to nginx
+
+# kubectl run pod2 ubuntu --command sleep 6000
+
+# kubectl get pods
+
+
+# kubectl exec -it pod2 -- bash
+
+in the pod execute
+
+# apt-get update && apt-get install curl -y
+
+# curl mysvc
+
+
+
+
+
+
