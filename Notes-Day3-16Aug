@@ -120,6 +120,8 @@ spec:
 
 Save the file
 
+# kubectl delete all --all
+
 # kubectl create -f hpa.yml
 
 # kubectl get all
