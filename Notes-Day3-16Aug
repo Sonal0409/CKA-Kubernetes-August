@@ -1,0 +1,166 @@
+
+# sudo su -
+
+# cd mykubefiles
+
+# vim deployment.yml
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kubeserve
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  
+      maxSurge: 1        # max number of pods to run for the deployment
+  selector:
+    matchLabels:
+      app: kubeserve
+  template:
+    metadata:
+      name: kubeserve
+      labels:
+        app: kubeserve
+    spec:
+      containers:
+       - name: app
+         image: leaddevops/kubeserve:v1
+        
+---
+kind: Service
+apiVersion: v1
+metadata:
+   name: kubeserve-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+  selector: 
+    app: kubeserve
+
+
+
+
+Save the file
+
+# kubectl create -f deployment.yml
+
+# kubectl get deployment
+# kubectl get service
+# kubectl get pods
+# kubectl scale deployment kubeserve --replicas=5
+# kubectl get pods
+# kubectl scale deployment kubeserve --replicas=2
+Change the Image
+
+# kubectl set image deployment kubeserve app=leaddevops/kubeserve:v2
+
+# kubectl rollout undo deployment kubeserve
+
+
+========================================================
+
+Horizontal Pod Autoscaler
+========================================================
+
+Instal Metric Server:
+
+git clone https://github.com/kodekloudhub/kubernetes-metrics-server.git
+cd kubernetes-metrics-server/
+kubectl create -f .
+
+# kubectl get pods -n kube-system
+
+# vim hpa.yml
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginxpod
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          resources:
+            limits:
+              cpu: 10m
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  type: ClusterIP  ## this is default if we do not type in service definition
+  selector:
+    app: nginx
+  ports:
+   - protocol: TCP
+     port: 80
+     targetPort: 80
+
+---
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 5
+
+
+
+Save the file
+
+# kubectl create -f hpa.yml
+
+# kubectl get all
+
+# Now launch the load generator pod -> open master terminal again
+
+# kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://Service-Internal-IP:80; done"
+
+Check the pods:
+
+kubectl get pods
+kubectl top pods
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
