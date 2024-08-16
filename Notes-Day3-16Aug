@@ -35,7 +35,6 @@ Save the file
 # kubectl create -f deployment.yml
 
 # kubectl get deployment
-# kubectl get service
 # kubectl get pods
 # kubectl scale deployment kubeserve --replicas=5
 # kubectl get pods
