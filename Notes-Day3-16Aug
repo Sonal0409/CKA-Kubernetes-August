@@ -59,6 +59,10 @@ kubectl create -f .
 
 # kubectl get pods -n kube-system
 
+# cd
+
+# cd mykubefiles
+
 # vim hpa.yml
 
 ---
