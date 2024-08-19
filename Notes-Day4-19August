@@ -1,0 +1,393 @@
+Kubernetes Persistent Volume:
+========================
+
+It is nothing but a unit of storage provided by the kubernetes administrator in the cluster
+
+A Persistent volume stores information like:
+
+>  type of volume that kubernetes has access to and you can claim for it
+> capacity of volume is available to be claimed
+>Status is the volume available or is it blocked, 
+> storageClass( Is the PV manually created by running the YAML file or created automatically by kubernetes)
+
+
+Persistent Volume Claim:
+—-------------------------------------
+
+It is a request raised by the admin
+
+A request to block desired volume with desired capacity
+
+In the claim we specify which 
+   > volume we want
+   > capacity
+   > storageClass
+
+
+
+Demo 1: Creation of HostPath Volume
+=================================
+
+The volume will be created on the VM where the POD scheduled
+This is a usecase:
+> Where volume is internal to the cluster
+> We will manually create the Persistent volume object
+> we will raise a claim
+> Specify the claim on the POD
+
+
+# vim pv.yml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+ name: block-pv
+spec:
+ storageClassName: manual
+ capacity:
+  storage: 1Gi
+ accessModes:
+  - ReadWriteOnce
+ hostPath:
+  path: /tmp/data
+
+
+# kubectl create -f pv.yml
+
+# vim pvc.yml
+
+
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+ name: pvc
+spec:
+ resources:
+  requests:
+   storage: 1Gi
+ storageClassName: manual
+ accessModes:
+  - ReadWriteOnce
+
+
+# kubectl create -f pvc.yml
+
+# kubectl get pv
+
+# kubectl get pvc
+
+
+# vim pod-pvc.yml
+
+kind: Pod
+apiVersion: v1
+metadata:
+ name: pod-pvc
+spec:
+ containers:
+  - image: nginx
+    name: c1
+    volumeMounts:  # directory on the container that should preserve daat on the volume
+     - mountPath: "/data"
+       name: my-volume
+ volumes:
+  - name: my-volume
+    persistentVolumeClaim:
+     claimName: pvc
+
+
+
+# kubectl create -f pod-pvc.yml
+# kubectl get pods -o wide
+
+Go to the worker node where the pods is scenduled and check the volume
+
+# /tmp/data  -> this directory will be there
+
+
+==============================================
+
+NFS storage and Hostpath storage with mysql-wordpress deployment
+==============================================
+
+Go to master Node:
+========================================
+
+Create an NFS server
+...
+sudo su -
+mkdir -p /data
+...
+
+## Install the NFS kernel server on the machine
+
+...
+
+sudo apt install nfs-kernel-server
+
+...
+
+## Change the owner user and group to nobody and nogroup
+
+...
+
+sudo chown nobody:nogroup /data/
+
+Set permissions to 777 to allow everyone to read, write, and execute files in this directory
+
+sudo chmod 777 /data/
+
+...
+
+## Open the exports file in the /etc directory for permission to access the host server machine
+
+...
+
+sudo vi /etc/exports
+
+Add the following code to the file:
+
+/data 	*(rw,sync,no_root_squash)
+
+Note: Exit the file and save the changes
+
+sudo exportfs -rv
+
+
+sudo systemctl restart nfs-kernel-server
+
+
+============================
+
+Deploy NFS client on worker nodes
+
+sudo apt install nfs-common
+
+
+===========================
+
+
+# vim pv-mysql.yml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-nfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data
+    server: <privateIPMasterNode>
+
+
+# kubectl create -f pv-mysql.yml
+# kubectl get pv
+
+# vim pvc-mysql.yml
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+
+
+# kubectl create -f pvc-mysql.yml
+
+# kubectl get pvc
+
+=============================================
+
+# vim deployment-mysql.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql-wordpress
+spec:
+  selector:
+    matchLabels:
+      app: mysql-wordpress
+      product: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql-wordpress
+        product: mysql
+    spec:
+      containers:
+      - image: mysql
+        name: mysql-container
+        env:
+        - name: MYSQL_DATABASE
+          value: wordpress
+        - name: MYSQL_ROOT_PASSWORD
+          value: password 
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-nfs
+
+# kubectl create -f   deployment-mysql.yml
+
+A mysql pod will be created → in the mysql container we have direct /var/lib/mysql → NFS client will take the data → send it to NFS server → which is writing the data in /data directory
+
+# cd /data
+# ls
+
+You will see the data of mysql container 
+
+
+# vim service-mysql.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql-wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: mysql-wordpress
+    product: mysql
+
+
+# kubectl create -f service-mysql.yml
+
+
+Wordpress deployment
+===========================
+
+# vim pv-wordpress.yml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath-pv
+  labels:
+    type: hostpath
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    type: DirectoryOrCreate
+    path: "/opt/wordpress"
+
+
+# kubectl create -f  pv-wordpress.yml
+
+# kubectl get pv
+
+
+# vim pvc-wordpress.yml
+
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: wordpress-hostpath
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 500Mi
+
+# kubectl create -f pvc-wordpress.yml
+
+# kubectl get pvc
+
+============================
+
+# vim deploy-wordpress.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: mysql-wordpress
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: mysql-wordpress
+    tier: frontend
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: mysql-wordpress
+spec:
+  selector:
+    matchLabels:
+      app: mysql-wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql-wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: mysql
+        - name: WORDPRESS_DB_USER
+          value: root
+        - name: WORDPRESS_DB_PASSWORD
+          value: password
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:
+        - name: wordpress-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-storage
+        persistentVolumeClaim:
+          claimName: wordpress-hostpath
+
+
+
+# kubectl create -f deploy-wordpress.yml
+
+# kubectl get pods
+
+# kubectl get svc
