@@ -166,7 +166,7 @@ sudo apt install nfs-common
 
 
 ===========================
-
+GO to master node and create below YAML
 
 # vim pv-mysql.yml
 
