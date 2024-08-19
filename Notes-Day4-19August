@@ -258,6 +258,7 @@ A mysql pod will be created → in the mysql container we have direct /var/lib/m
 
 You will see the data of mysql container 
 
+# cd
 
 # vim service-mysql.yml
 
