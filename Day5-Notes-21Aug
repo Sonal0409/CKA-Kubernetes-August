@@ -148,6 +148,58 @@ spec:
 
 # kubectl get all
 
+===============================================================
+
+
+Deploy wordpress:
+====================
+
+# vim wordpress-deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: wordpress
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: mysql-wordpress
+   tier: frontend
+ template:
+  metadata:
+   labels:
+    app: mysql-wordpress
+    tier: frontend
+  spec:
+   containers:
+    - name: wordpress-container
+      image: wordpress
+      env:
+      - name: WORDPRESS_DB_HOST
+        value: mysql
+      - name: WORDPRESS_DB_USER
+        value: root
+      - name: WORDPRESS_DB_PASSWORD
+        valueFrom:
+         secretKeyRef:
+          name: mysql-pwd
+          key: password
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: wordpress
+spec:
+ type: NodePort
+ ports:
+  - targetPort: 80
+    port: 80
+ selector:
+  app: mysql-wordpress
+  tier: frontend
+
 
 
 
