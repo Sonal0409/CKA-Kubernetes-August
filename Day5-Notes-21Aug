@@ -290,12 +290,12 @@ metadata:
  name: mysecret-sa
  namespace: kubernetes-dashboard
  annotations:
-  kubernetes.io/service-account.name: admin-user
+  kubernetes.io/service-account.name: sandry
 
 
 # kubectl create -f sercret-sa.yml
 
-# kubectl describe secret   mysecret-sa -n kubernetes-dashboard
+# kubectl describe secret  mysecret-sa -n kubernetes-dashboard
 
 Copy the token and then paste on the dashboard page to loginto it.
 
