@@ -122,6 +122,32 @@ spec:
           claimName: mysql-nfs
 
 
+# kubectl create -f mysql-deployment.yml
+
+# kubectl get pods
+
+# kubectl get all
+=========================================================================
+
+# vim service-mysql.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysql
+spec:
+ type: ClusterIP
+ ports:
+  - targetPort: 3306
+    port: 3306
+ selector:
+  app: mysql-wordpress
+  product: mysql
+
+# kubectl create -f service-mysql.yml
+
+# kubectl get all
+
 
 
 
