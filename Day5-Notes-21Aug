@@ -1,3 +1,36 @@
+
+# vim pv-mysql.yml
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-nfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data
+    server: <privateipaddressofMasternode>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Scheduling in kubernetes using:
 ****************
 
