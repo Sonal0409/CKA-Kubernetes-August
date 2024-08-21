@@ -1,4 +1,14 @@
 
+# kubectl delete deployment --all
+
+# kubectl delete pvc --all
+
+# kubectl delete pv --all
+
+
+
+
+
 # vim pv-mysql.yml
 
 
