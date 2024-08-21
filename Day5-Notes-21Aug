@@ -78,6 +78,8 @@ Create configMap on the terminal
 
 #  kubectl create configmap db1 --from-literal=MYSQL_DATABASE=wordpress
 
+# kubectl get configmap
+
 ===========================================
 
 # vim mysql-deployment.yml
