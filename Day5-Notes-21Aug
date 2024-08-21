@@ -6,6 +6,8 @@ All the nodes have to be in ready status
 
 # kubectl delete deployment --all
 
+# kubectl delete pod --all
+
 # kubectl delete pvc --all
 
 # kubectl delete pv --all
