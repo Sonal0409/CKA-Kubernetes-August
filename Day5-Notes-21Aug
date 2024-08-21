@@ -244,6 +244,62 @@ Example: https://localhost:31851
 
 Click on Advanced -> Accept Risk and Continue
 
+=====================================
+
+To access the dashboard we need a token for which we have to create a Service account
+
+vim serviceaccount.yml
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sandry
+  namespace: kubernetes-dashboard
+
+
+# kubectl create -f serviceaccount.yml
+
+
+# vim clusterrole-sa.yml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+ name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+ - kind: ServiceAccount
+   name: sandry
+   namespace: kubernetes-dashboard
+
+
+
+# kubectl create -f clusterrole-sa.yml
+
+
+
+# vim sercret-sa.yml
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+ name: mysecret-sa
+ namespace: kubernetes-dashboard
+ annotations:
+  kubernetes.io/service-account.name: admin-user
+
+
+# kubectl create -f sercret-sa.yml
+
+# kubectl describe secret   mysecret-sa -n kubernetes-dashboard
+
+Copy the token and then paste on the dashboard page to loginto it.
+
+You will be able to see the kubernetes dashboard now.
 
 
 
