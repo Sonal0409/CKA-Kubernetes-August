@@ -218,7 +218,7 @@ Execute below commands and take a complete screenshot:
 
 ===============================================================================
 
-Deploy the dashboard:
+Deploy the dashboard and take a screenshot
 
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 # kubectl get all  -n kubernetes-dashboard
@@ -235,7 +235,7 @@ Verifying the changes
 
 kubectl get svc -n kubernetes-dashboard -o wide
 
-Accessing Kubernetes Dashboard
+Accessing Kubernetes Dashboard and take a screenshot
 
 Click on the master tab on the lab, and then click on the desktop option.
 Open Firefox browser 
@@ -259,6 +259,7 @@ metadata:
 
 # kubectl create -f serviceaccount.yml
 
+Take a screenshot
 
 # vim clusterrole-sa.yml
 
@@ -301,6 +302,7 @@ Copy the token and then paste on the dashboard page to loginto it.
 
 You will be able to see the kubernetes dashboard now.
 
+Take a screenshot of the dashboard and submit the project
 
 
 
