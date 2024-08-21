@@ -36,7 +36,7 @@ spec:
     path: /data
     server: <privateipaddressofMasternode>
 
-
+# kubectl create -f pv-mysql.yml
 
 
 
