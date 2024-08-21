@@ -203,6 +203,24 @@ spec:
 # kubectl create -f wordpress-deployment.yml
 
 # kubectl get all
+======================================================
+Execute below commands and take a complete screenshot:
+
+# kubectl get pv
+
+# kubectl get pvc
+
+# kubectl get secrets
+
+# kubectl get configmap
+
+# kubectl get all
+
+
+
+
+
+
 
 
 
