@@ -73,7 +73,51 @@ data:
 
 # kubectl get secrets
 
+==================================
+Create configMap on the terminal 
 
+#  kubectl create configmap db1 --from-literal=MYSQL_DATABASE=wordpress
+
+===========================================
+
+# vim mysql-deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: mysql
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: mysql-wordpress
+ template:
+  metadata:
+   labels:
+    app: mysql-wordpress
+    product: mysql
+  spec:
+   containers:
+     - name: mysql-container
+       image: mysql
+       env:
+       - name: MYSQL_ROOT_PASSWORD
+         valueFrom:
+          secretKeyRef:
+           name: mysql-pwd
+           key: password
+       - name: MYSQL_DATABASE
+         valueFrom:
+          configMapKeyRef:
+           name: db1
+           key: MYSQL_DATABASE
+       volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+   volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-nfs
 
 
 
