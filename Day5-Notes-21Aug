@@ -225,7 +225,9 @@ Deploy the dashboard:
 
 # kubectl edit svc -n kubernetes-dashboard kubernetes-dashboard
 
-Chnage the type of service in spec from ClusterIP to NodePort
+press i
+
+Chnage the type  in spec from ClusterIP to NodePort
 
 Save the file
 
