@@ -200,7 +200,9 @@ spec:
   app: mysql-wordpress
   tier: frontend
 
+# kubectl create -f wordpress-deployment.yml
 
+# kubectl get all
 
 
 
