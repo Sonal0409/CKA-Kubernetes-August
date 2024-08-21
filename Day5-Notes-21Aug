@@ -13,6 +13,7 @@ All the nodes have to be in ready status
 # kubectl delete pv --all
 
 
+# sudo systemctl restart nfs-kernel-server
 
 
 
