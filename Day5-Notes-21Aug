@@ -57,9 +57,21 @@ spec:
 # kubectl create -f pvc-mysql.yml
 
 # kubectl get pvc
+==========================================
+Create an Object of volume type SECRET in kubernetes that will preserve password in an Encrypted format
 
+# vim mysqlsecret.yml
 
+kind: Secret
+apiVersion: v1
+metadata:
+ name: mysql-pwd
+data:
+ password: "cGFzc3dvcmQ="
 
+# kubectl create -f mysqlsecret.yml
+
+# kubectl get secrets
 
 
 
