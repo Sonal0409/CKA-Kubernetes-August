@@ -1,0 +1,165 @@
+Scheduling in kubernetes using:
+****************
+
+NodeName:
+
+Create a yaml file as given below : 
+In the spec section of pod, write the node name where you want to scehdule the pod
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeserve
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kubeserve
+  template:
+    metadata:
+      name: kubeserve
+      labels:
+        app: kubeserve
+    spec:
+      nodeName: gke-cluster-1-default-pool-e18bdb3b-3h5s
+      containers:
+      - image: leaddevops/kubeserve:v1
+        name: app
+
+save the file and execute the yaml
+
+you will see both the pod is scheduled on your mentioned node
+
+Node Selector:
+************************
+
+# kubectl delete deployment --all
+
+$ kubectl get nodes
+
+every node has multiple labels:
+
+$ kubectl describe node <node Name>
+
+
+Add your custom labels to all the nodes:
+
+we will add label as  disk=hdd ===>  to node 1 and node 3
+we will add lable as  disk=ssd ===> to node 2
+
+$ kubectl label node <nodename1> disk=hdd
+
+$ kubectl label node <nodename3> disk=hdd
+
+$ kubectl label node <nodename2> disk=ssd
+kubectl label node gke-cluster-1-default-pool-e18bdb3b-3l9r disk=ssd
+
+Now create a yaml file to deploy pods with node selector
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeserve
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kubeserve
+  template:
+    metadata:
+      name: kubeserve
+      labels:
+        app: kubeserve
+    spec:
+      nodeSelector:
+       disk: ssd
+      containers:
+      - image: leaddevops/kubeserve:v1
+        name: app
+
+
+================================================
+
+Create a replica Set, pods may be scheduled on worker1 and worker2
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+ name: myrs
+spec:
+ replicas: 3
+ selector:
+  matchLabels:
+   type: webserver
+ template:
+  metadata:
+   labels:
+    type: webserver
+  spec:
+   containers:
+    - name: c1
+      image: nginx
+
+
+On the master node taint one of the node - worker1
+
+kubectl taint node gke-cluster-1-default-pool-7fe774cd-0m0q color=red:NoSchedule
+
+This node will be tainted
+
+Scale up the replicas, no pod will be scehduled on the tainted node.
+
+# kubectl scale replicaset myrs --replicas=6
+
+This is tainting. 
+
+Now remove the taint:
+
+kubectl taint node gke-cluster-1-default-pool-7fe774cd-0m0q color=red:NoSchedule-
+
+
+We have 2 types of effect in taint
+
+NoSchedule
+NoExecute
+
+Example of NoExecute : in this case the running pods on the node that is tainted will leave the node and get created somewhere else
+No new pod will be scheduled on the taineted node as No execute.
+
+Now taint one of the node as :
+
+kubectl taint node gke-cluster-1-default-pool-7fe774cd-0m0q color=red:NoExecute
+
+You will observe that pods form tainted node are terminated
+
+
+Tolerations:
+*********************
+
+first taint a node with a key and value
+
+kubectl taint node gke-cluster-1-default-pool-7fe774cd-0m0q color=red:NoSchedule
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeserve1
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: kubeserve
+  template:
+    metadata:
+      name: kubeserve
+      labels:
+        app: kubeserve
+    spec:
+      tolerations:
+        - key: color
+          operator: "Equal"
+          value: "red"
+          effect: "NoSchedule"
+      containers:
+      - image: leaddevops/kubeserve:v1
+        name: app
