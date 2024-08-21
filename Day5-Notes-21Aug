@@ -216,6 +216,32 @@ Execute below commands and take a complete screenshot:
 
 # kubectl get all
 
+===============================================================================
+
+Deploy the dashboard:
+
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+# kubectl get all  -n kubernetes-dashboard
+
+# kubectl edit svc -n kubernetes-dashboard kubernetes-dashboard
+
+Chnage the type of service in spec from ClusterIP to NodePort
+
+Save the file
+
+Verifying the changes
+
+kubectl get svc -n kubernetes-dashboard -o wide
+
+Accessing Kubernetes Dashboard
+
+Click on the master tab on the lab, and then click on the desktop option.
+Open Firefox browser 
+https://localhost:<<NodePort>>
+Example: https://localhost:31851
+
+Click on Advanced -> Accept Risk and Continue
+
 
 
 
