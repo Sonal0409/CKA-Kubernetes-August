@@ -37,6 +37,26 @@ spec:
     server: <privateipaddressofMasternode>
 
 # kubectl create -f pv-mysql.yml
+# kubectl get pv
+
+======================================
+
+# vim pvc-mysql.yml
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+
+# kubectl create -f pvc-mysql.yml
+
+# kubectl get pvc
 
 
 
