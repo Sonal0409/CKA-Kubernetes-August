@@ -1,4 +1,9 @@
 
+
+# kubectl get nodes
+
+All the nodes have to be in ready status
+
 # kubectl delete deployment --all
 
 # kubectl delete pvc --all
