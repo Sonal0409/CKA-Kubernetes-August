@@ -1,3 +1,63 @@
+NFS storage with mysql-wordpress deployment
+==============================================
+
+Go to master Node:
+========================================
+
+Create an NFS server
+...
+sudo su -
+mkdir -p /data
+...
+
+## Install the NFS kernel server on the machine
+
+...
+
+sudo apt install nfs-kernel-server
+
+...
+
+## Change the owner user and group to nobody and nogroup
+
+...
+
+sudo chown nobody:nogroup /data/
+
+Set permissions to 777 to allow everyone to read, write, and execute files in this directory
+
+sudo chmod 777 /data/
+
+...
+
+## Open the exports file in the /etc directory for permission to access the host server machine
+
+...
+
+sudo vi /etc/exports
+
+Add the following code to the file:
+
+/data 	*(rw,sync,no_root_squash)
+
+Note: Exit the file and save the changes
+
+sudo exportfs -rv
+
+
+sudo systemctl restart nfs-kernel-server
+
+
+============================
+
+Deploy NFS client on worker nodes
+
+sudo apt install nfs-common
+
+
+===========================
+
+
 # kubectl get nodes
 
 All the nodes have to be in ready status
