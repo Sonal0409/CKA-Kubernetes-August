@@ -73,6 +73,16 @@ Scheduling in kubernetes using:
 
 NodeName:
 
+Execute the command  and copy the name of worker 1 and worker 2
+
+# kubectl get nodes
+
+Example:
+
+worker1: ip-172-31-5-118 
+worker2: ip-172-31-6-128
+
+
 Create a yaml file as given below : 
 In the spec section of pod, write the node name where you want to scehdule the pod
 
@@ -91,7 +101,7 @@ spec:
       labels:
         app: kubeserve
     spec:
-      nodeName: gke-cluster-1-default-pool-e18bdb3b-3h5s
+      nodeName: ip-172-31-5-118
       containers:
       - image: leaddevops/kubeserve:v1
         name: app
