@@ -130,15 +130,15 @@ $ kubectl describe node <node Name>
 
 Add your custom labels to all the nodes:
 
-we will add label as  disk=hdd ===>  to node 1 and node 3
+we will add label as  disk=hdd ===>  to node 1 
 we will add lable as  disk=ssd ===> to node 2
 
 $ kubectl label node <nodename1> disk=hdd
 
-$ kubectl label node <nodename3> disk=hdd
+$ kubectl label node <nodename2> disk=hdd
 
-$ kubectl label node <nodename2> disk=ssd
-kubectl label node gke-cluster-1-default-pool-e18bdb3b-3l9r disk=ssd
+Example:
+kubectl label node ip-172-31-5-118  disk=ssd
 
 Now create a yaml file to deploy pods with node selector
 
