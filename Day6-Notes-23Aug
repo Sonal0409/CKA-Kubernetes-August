@@ -135,7 +135,7 @@ we will add lable as  disk=ssd ===> to node 2
 
 $ kubectl label node <nodename1> disk=hdd
 
-$ kubectl label node <nodename2> disk=hdd
+$ kubectl label node <nodename2> disk=ssd
 
 Example:
 kubectl label node ip-172-31-5-118  disk=ssd
