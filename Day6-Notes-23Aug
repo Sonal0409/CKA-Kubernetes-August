@@ -86,6 +86,8 @@ worker2: ip-172-31-6-128
 Create a yaml file as given below : 
 In the spec section of pod, write the node name where you want to scehdule the pod
 
+# vim nodeNamedemo.yml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
