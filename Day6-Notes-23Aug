@@ -57,7 +57,7 @@ spec:
  :wq!
  
  # kubectl apply -f pod-configmap.yml
- # kubectl exec -it pod-configmap bash
+ # kubectl exec -it pod-configmap -- bash
  # cd /etc/config
  
  you will find the dev.properties file and configurations
