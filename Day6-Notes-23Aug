@@ -2,6 +2,23 @@ A ConfigMap is an API object used to store non-confidential data in key-value pa
 A ConfigMap allows you to decouple environment-specific configuration from your container images, so that your applications are easily portable.
 A ConfigMap is not designed to hold large chunks of data
 
+For example:
+==================
+
+
+1. Create a properties file with key and values for dev Env
+2. Create a properties file with key and values for Prod Env
+3. Store the dev file in a volume of type configMap
+4. Store the Prod  file in a volume of type configMap
+5. Create Pod of nginx Image and on the container mount the volume of Dev ConfigMap
+6. Create Pod of nginx Image and on the container mount the volume of Prod ConfigMap
+Observation:
+2 pods are created form the same Image
+Each pod is using a different configuration
+in this way we will not have to create multiple Images for each env.. Same Image will work in all the environment
+we just have to mount the correct configMAP
+
+
 CONFIG MAP
 ===========================================
 # vim dev.properties
