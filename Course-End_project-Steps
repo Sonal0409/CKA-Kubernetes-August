@@ -1,0 +1,303 @@
+# kubectl get nodes
+
+All the nodes have to be in ready status
+
+# kubectl delete deployment --all
+
+# kubectl delete pod --all
+
+# kubectl delete pvc --all
+
+# kubectl delete pv --all
+
+
+# sudo systemctl restart nfs-kernel-server
+
+
+
+# vim pv-mysql.yml
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-nfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data
+    server: <privateipaddressofMasternode>
+
+# kubectl create -f pv-mysql.yml
+# kubectl get pv
+
+======================================
+
+# vim pvc-mysql.yml
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-nfs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+
+# kubectl create -f pvc-mysql.yml
+
+# kubectl get pvc
+==========================================
+Create an Object of volume type SECRET in kubernetes that will preserve password in an Encrypted format
+
+# vim mysqlsecret.yml
+
+kind: Secret
+apiVersion: v1
+metadata:
+ name: mysql-pwd
+data:
+ password: "cGFzc3dvcmQ="
+
+# kubectl create -f mysqlsecret.yml
+
+# kubectl get secrets
+
+==================================
+Create configMap on the terminal 
+
+#  kubectl create configmap db1 --from-literal=MYSQL_DATABASE=wordpress
+
+# kubectl get configmap
+
+===========================================
+
+# vim mysql-deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: mysql
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: mysql-wordpress
+ template:
+  metadata:
+   labels:
+    app: mysql-wordpress
+    product: mysql
+  spec:
+   containers:
+     - name: mysql-container
+       image: mysql
+       env:
+       - name: MYSQL_ROOT_PASSWORD
+         valueFrom:
+          secretKeyRef:
+           name: mysql-pwd
+           key: password
+       - name: MYSQL_DATABASE
+         valueFrom:
+          configMapKeyRef:
+           name: db1
+           key: MYSQL_DATABASE
+       volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+   volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-nfs
+
+
+# kubectl create -f mysql-deployment.yml
+
+# kubectl get pods
+
+# kubectl get all
+=========================================================================
+
+# vim service-mysql.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysql
+spec:
+ type: ClusterIP
+ ports:
+  - targetPort: 3306
+    port: 3306
+ selector:
+  app: mysql-wordpress
+  product: mysql
+
+# kubectl create -f service-mysql.yml
+
+# kubectl get all
+
+===============================================================
+
+
+Deploy wordpress:
+====================
+
+# vim wordpress-deployment.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: wordpress
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: mysql-wordpress
+   tier: frontend
+ template:
+  metadata:
+   labels:
+    app: mysql-wordpress
+    tier: frontend
+  spec:
+   containers:
+    - name: wordpress-container
+      image: wordpress
+      env:
+      - name: WORDPRESS_DB_HOST
+        value: mysql
+      - name: WORDPRESS_DB_USER
+        value: root
+      - name: WORDPRESS_DB_PASSWORD
+        valueFrom:
+         secretKeyRef:
+          name: mysql-pwd
+          key: password
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: wordpress
+spec:
+ type: NodePort
+ ports:
+  - targetPort: 80
+    port: 80
+ selector:
+  app: mysql-wordpress
+  tier: frontend
+
+# kubectl create -f wordpress-deployment.yml
+
+# kubectl get all
+======================================================
+Execute below commands and take a complete screenshot:
+
+# kubectl get pv
+
+# kubectl get pvc
+
+# kubectl get secrets
+
+# kubectl get configmap
+
+# kubectl get all
+
+===============================================================================
+
+Deploy the dashboard and take a screenshot
+
+# kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+# kubectl get all  -n kubernetes-dashboard
+
+# kubectl edit svc -n kubernetes-dashboard kubernetes-dashboard
+
+press i
+
+Chnage the type  in spec from ClusterIP to NodePort
+
+Save the file
+
+Verifying the changes
+
+kubectl get svc -n kubernetes-dashboard -o wide
+
+Accessing Kubernetes Dashboard and take a screenshot
+
+Click on the master tab on the lab, and then click on the desktop option.
+Open Firefox browser 
+https://localhost:<<NodePort>>
+Example: https://localhost:31851
+
+Click on Advanced -> Accept Risk and Continue
+
+=====================================
+
+To access the dashboard we need a token for which we have to create a Service account
+
+vim serviceaccount.yml
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sandry
+  namespace: kubernetes-dashboard
+
+
+# kubectl create -f serviceaccount.yml
+
+Take a screenshot
+
+# vim clusterrole-sa.yml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+ name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+ - kind: ServiceAccount
+   name: sandry
+   namespace: kubernetes-dashboard
+
+
+
+# kubectl create -f clusterrole-sa.yml
+
+
+
+# vim sercret-sa.yml
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+ name: mysecret-sa
+ namespace: kubernetes-dashboard
+ annotations:
+  kubernetes.io/service-account.name: sandry
+
+
+# kubectl create -f sercret-sa.yml
+
+# kubectl describe secret  mysecret-sa -n kubernetes-dashboard
+
+Copy the token and then paste on the dashboard page to loginto it.
+
+You will be able to see the kubernetes dashboard now.
+
+Take a screenshot of the dashboard and submit the project
