@@ -142,6 +142,8 @@ kubectl label node ip-172-31-5-118  disk=ssd
 
 Now create a yaml file to deploy pods with node selector
 
+# vim nodeSelectorDemo.yml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -162,6 +164,14 @@ spec:
       containers:
       - image: leaddevops/kubeserve:v1
         name: app
+
+
+
+# kubectl create -f nodeSelectorDemo.yml
+
+The pod will be scehduled on thw worker node with label as disk=ssd
+
+# kubectl get pods -o wide
 
 
 ================================================
