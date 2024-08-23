@@ -19,8 +19,13 @@ in this way we will not have to create multiple Images for each env.. Same Image
 we just have to mount the correct configMAP
 
 
+
+
 CONFIG MAP
 ===========================================
+
+# kubectl delete all --all
+
 # vim dev.properties
 app.env:dev
 app.mem=2048m
