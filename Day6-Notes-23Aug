@@ -110,6 +110,10 @@ spec:
 
 save the file and execute the yaml
 
+# kubectl create -f nodeNamedemo.yml
+
+# kubectl get pods -o wide
+
 you will see both the pod is scheduled on your mentioned node
 
 Node Selector:
