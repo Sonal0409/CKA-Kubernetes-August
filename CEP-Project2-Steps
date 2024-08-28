@@ -1,0 +1,344 @@
+Course End project: Project - 2
+===================================================
+
+Activities to be Performed:
+
+1. Backing up the etcd cluster data 
+
+======================================
+Install etcdctl:
+  export RELEASE="3.3.13"
+   wget https://github.com/etcd-io/etcd/releases/download/v${RELEASE}/etcd-v${RELEASE}-linux-amd64.tar.gz
+   tar xvf etcd-v${RELEASE}-linux-amd64.tar.gz
+   cd etcd-v${RELEASE}-linux-amd64
+   sudo mv etcdctl /usr/local/bin
+
+
+# mkdir /tmp/mybackup
+
+# kubectl get pods -o wide -n kube-system
+
+# ETCDCTL_API=3 etcdctl --endpoints=172.31.9.51:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key snapshot save /tmp/mybackup/etcd-snapshot-latest.db
+
+
+
+
+2. Creating and verifying the namespaces
+
+
+# kubectl create namespace cep-project2
+
+# kubectl label namespace cep-project2 slearn=cep-project2
+
+
+
+
+
+
+
+Create a network policy to allow all pods to communicate only with in namespace cep-project2
+
+# vim netpol-cep2.yml
+
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-from-ns
+  namespace: cep-project2
+spec:
+  podSelector: {}
+  policyTypes:
+   - Ingress
+  ingress:
+   - from:
+      #- ipBlock:
+      - namespaceSelector:
+         matchLabels:
+          slearn: cep-project2
+      #- podSelecotr:
+
+
+# kubectl create -f netpol-cep2.yml
+
+# kubectl get netpol -n cep-project2
+
+
+
+
+
+
+
+3. Generating a certificate and private key in the worker node 
+
+# mkdir cep-project2
+# cd cep-project2
+
+Generating an RSA private key and certificate requests
+To generate an RSA private key, run the following command:
+...
+
+# sudo openssl genrsa -out user3.key 2048
+
+Use the following command to generate certificate requests:
+...
+
+# sudo openssl req -new -key user3.key -out user3.csr
+
+Enter any details like:
+
+• Organization Name: cep-project2
+
+• Common Name: user4
+
+
+# sudo openssl x509 -req -in user4.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out user4.crt -days 500
+
+
+
+
+
+
+# vim user4-role.yml
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   namespace: cep-project2
+   name: user4-role
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["deployments", "pods", "services"]
+  verbs: ["get", "list", "watch"]
+
+
+# kubectl create -f user4-role.yml
+
+
+
+
+
+Create the role binding
+
+# vim rolebind-user4.yml
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+ name: rolebind-user4
+ namespace: cep-project2
+subjects:
+- kind: User
+  name: user4
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: user4-role
+  apiGroup: ""
+
+
+# kubectl create -f rolebind-user4.yml
+
+
+
+
+
+Set credentials for user 4
+============================
+
+
+# kubectl config set-credentials user4 --client-certificate=/root/cep-project2/user4.crt --client-key=/root/cep-project2/user4.key
+
+
+Add the credentials in config file:
+===============================
+
+#  kubectl config set-context user4-context --cluster=kubernetes --namespace=cep-project2 --user=user4
+
+
+
+
+
+
+# cat .kube/config
+
+Copy the content of the file
+
+
+
+Go to Worker 2 now:
+======================
+
+Create a file 
+
+# vim myconfig
+
+Paste the content of config file here
+
+# mkdir cep-project2
+
+# cd cep-project2
+
+
+Go to master node:
+Go to the directory
+# cd cep-project2
+# cat user4.key
+Copy the content:
+
+Go to worker node
+Create the file in current directory cep-project2
+
+# vim user4.key
+
+Paste the content of the key copied from master node
+
+Again Go to master node:
+Go to the directory
+# cd cep-project2
+# cat user4.crt
+Copy the content:
+
+Go to worker node
+Create the file in current directory cep-project2
+
+# vim user4.crt
+
+Paste the content of the key copied from master node
+
+
+This screenshot is of mater node:
+
+
+Now query the context
+
+# kubectl config get-contexts --kubeconfig=myconfig
+
+# kubectl config  --kubeconfig=myconfig use-context user4-context
+
+# kubectl config delete-context kubernetes-admin@kubernetes --kubeconfig=myconfig
+
+
+# kubectl get pods -n default --kubeconfig=myconfig
+
+# kubectl get pods -n cep-project2 --kubeconfig=myconfig
+
+
+
+4. Upgrading the Kubernetes cluster with the latest version
+
+
+# apt update
+
+#  apt-cache madison kubeadm
+
+
+
+
+
+Choose the version  for upgrading:
+
+ kubeadm | 1.28.10-1.1 | https://pkgs.k8s.io/core:/stable:/v1.28/deb  Packages
+
+
+
+# apt-mark unhold kubeadm
+
+# apt-get update
+
+# apt-get install kubeadm='1.28.10-1.1' -y
+
+
+
+
+# apt-mark hold kubeadm
+
+
+
+# kubeadm upgrade plan
+
+
+
+
+
+
+
+# kubeadm upgrade apply v1.28.10
+
+
+
+It will take a few minutes to complete.
+
+
+
+
+Drain the master node and upgrade kubelet and kubectl
+
+
+# kubectl drain ip-172-31-9-51 --ignore-daemonsets
+
+
+
+
+
+# apt-get install kubelet='1.28.10-1.1' kubectl='1.28.10-1.1' -y
+
+# apt-mark hold kubelet kubectl
+
+
+
+
+
+
+
+# systemctl daemon-reload
+
+# systemctl restart kubelet
+
+# kubectl uncordon ip-172-31-9-51
+
+
+
+
+
+
+
+On the worker node:
+
+sudo apt-mark unhold kubeadm
+sudo apt-get update
+# sudo apt-get install -y kubeadm='1.28.10-1.1'
+# sudo apt-mark hold kubeadm 
+
+# sudo kubeadm upgrade node 
+
+
+
+
+
+
+
+On the Master node,
+kubectl drain ip-172-31-29-25 --ignore-daemonsets --delete-emptydir-data --force
+ 
+Here give the name of the worker node in above command
+Note: While executing the above drain command, if there are pods cannot be deleted,
+Error message: cannot delete Pods declare no controller (use --force to override):  
+
+On the Worker node,
+sudo apt-mark unhold kubelet kubectl
+sudo apt-get update
+sudo apt-get install -y kubelet='1.28.10-1.1' kubectl='1.28.10-1.1' 
+sudo apt-mark hold kubelet kubectl 
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet 
+
+On the Master node,
+# kubectl uncordon ip-172-31-29-25
+
+
+Here give the name of the workernode
+
+
+# kubectl get nodes 
